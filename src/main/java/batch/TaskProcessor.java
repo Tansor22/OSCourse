@@ -4,6 +4,7 @@ import batch.tasks.Task;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
+import rich_text.RichConsole;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,15 +23,16 @@ public class TaskProcessor {
         while (!mutableTasks.isEmpty()) {
             // getting task
             Task task = selectTask(mutableTasks);
-            Task.Part currentPart = task.getParts().get(task.getCurrentTaskIndex());
+            Task.Part part = task.getParts().get(task.getCurPartIndex());
             // performing task part
-            System.out.println("Task number #" + curTaskIndex + ": " + currentPart.getDescription());
+            RichConsole.print("Task number #" + curTaskIndex + ": " + part.getDescription(), task.getDecoration());
             try {
-                Thread.sleep(currentPart.getTime().toMillis());
+                Thread.sleep(part.getTime().toMillis());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
             // task part performed
+            System.out.println("Part number #" + part + "is done!");
             if (task.proceed()) {
                 System.out.println("Task number #" + curTaskIndex + " is done!");
                 mutableTasks.remove(curTaskIndex);

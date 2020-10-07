@@ -1,37 +1,26 @@
 package batch.tasks;
 
 import lombok.*;
+import rich_text.RichTextConfig;
 
-import java.time.Duration;
 import java.util.List;
 
 @Builder
 @Getter
-@Data
 public class Task {
     @Singular(value = "part")
     List<Part> parts;
     @Builder.Default
-    int currentTaskIndex = 0;
-
-    // lombok has no post construct feature
-    private Task(List<Part> parts, int currentTaskIndex) {
-        this.parts = parts;
-        this.currentTaskIndex = currentTaskIndex;
-        init();
-    }
-
-    void init() {
-
-    }
+    int curPartIndex = 0;
+    RichTextConfig decoration;
 
     public boolean isDone() {
         // all parts were performed
-        return currentTaskIndex >= parts.size();
+        return curPartIndex >= parts.size();
     }
 
     public boolean proceed() {
-        System.out.println("Part number #" + currentTaskIndex++ + "is done!");
+        curPartIndex++;
         return isDone();
     }
 
@@ -40,12 +29,12 @@ public class Task {
     @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Part {
         String description;
-        Duration time;
+        DurationWrapper time;
 
-        public static Part defaultPart(Duration time) {
+        public static Part defaultPart(DurationWrapper time) {
             return Part.builder()
                     .time(time)
-                    .description("I am a chunk of bigger task, I take " + time.toString() + " time units...")
+                    .description("I am a chunk of bigger task, I take " + time.toString() + "...")
                     .build();
         }
     }
