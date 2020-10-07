@@ -5,10 +5,12 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.Singular;
 import rich_text.RichConsole;
+import rich_text.RichTextConfig;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 @Builder
 @Getter
@@ -23,30 +25,41 @@ public class TaskProcessor {
         while (!mutableTasks.isEmpty()) {
             // getting task
             Task task = selectTask(mutableTasks);
-            Task.Part part = task.getParts().get(task.getCurPartIndex());
+            Task.Operation operation = task.getOperations().get(task.getCurOpIndex());
             // performing task part
-            RichConsole.print("Task number #" + curTaskIndex + ": " + part.getDescription(), task.getDecoration());
-            try {
-                Thread.sleep(part.getTime().toMillis());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
+            RichConsole.print("Switched to task '" + task.getName() + "': '" + operation.getName() + "' - " + operation.getOperationDescription(), task.getDecoration());
+            perform(operation);
             // task part performed
-            System.out.println("Part number #" + part + "is done!");
+            RichConsole.print("'" + operation.getName() + "' of '" + task.getName() + "' is done!", task.getDecoration());
             if (task.proceed()) {
-                System.out.println("Task number #" + curTaskIndex + " is done!");
-                mutableTasks.remove(curTaskIndex);
-                curTaskIndex = BatchConstants.PLAIN_RND_SELECTION;
-                System.out.println("Switching context...");
+                RichConsole.print("'" + task.getName() + "' is done!", task.getDecoration());
+                postTaskProcessed(mutableTasks);
             } else {
-                System.out.println("Interruption occurred..");
+                RichConsole.print("Interruption occurred: " + operation.getInterruptionDescription(), task.getDecoration());
             }
+        }
+        RichConsole.print("Tasks performed - " + tasks.stream()
+                .map(Task::getName)
+                .collect(Collectors.joining(", ")), RichTextConfig.builder().build());
+    }
+
+    private void postTaskProcessed(List<Task> tasks) {
+        tasks.remove(curTaskIndex);
+        curTaskIndex = BatchConstants.PLAIN_RND_SELECTION;
+    }
+
+    private static void perform(Task.Operation operation) {
+        try {
+            Thread.sleep(operation.getTime().toMillis());
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
     }
 
-    private boolean noSpecialSelectionRequired () {
+    private boolean noSpecialSelectionRequired() {
         return curTaskIndex == BatchConstants.PLAIN_RND_SELECTION;
     }
+
     /**
      * @return
      */
