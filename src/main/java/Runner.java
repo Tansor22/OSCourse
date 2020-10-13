@@ -1,4 +1,4 @@
-import batch.TaskProcessor;
+import batch.BatchProcessor;
 import batch.tasks.DurationWrapper;
 import batch.tasks.Task;
 import rich_text.Color;
@@ -8,7 +8,7 @@ import static batch.tasks.Task.Operation.*;
 
 public class Runner {
     public static void main(String[] args) {
-        TaskProcessor.builder()
+        BatchProcessor.builder()
                 .task(Task.builder()
                         .name("Browser Google Tab")
                         .decoration(RichTextConfig.builder()

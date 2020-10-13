@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 
 @Builder
 @Getter
-public class TaskProcessor {
+public class BatchProcessor {
     @Singular(value = "task")
     List<Task> tasks;
     @Builder.Default
@@ -56,8 +56,8 @@ public class TaskProcessor {
         }
     }
 
-    private boolean noSpecialSelectionRequired() {
-        return curTaskIndex == BatchConstants.PLAIN_RND_SELECTION;
+    private boolean noSpecialSelectionRequired(List<Task> tasks) {
+        return tasks.size() == 1 || curTaskIndex == BatchConstants.PLAIN_RND_SELECTION;
     }
 
     /**
@@ -65,7 +65,7 @@ public class TaskProcessor {
      */
     public Task selectTask(List<Task> tasks) {
         Random r = new Random(System.currentTimeMillis());
-        if (noSpecialSelectionRequired()) {
+        if (noSpecialSelectionRequired(tasks)) {
             curTaskIndex = r.nextInt(tasks.size());
         } else {
             int[] indexes = generateIndexesExclude(tasks.size(), curTaskIndex);
