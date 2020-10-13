@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Singular;
 import rich_text.RichConsole;
 import rich_text.RichTextConfig;
+import shared.TaskProcessor;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.stream.Collectors;
 
 @Builder
 @Getter
-public class BatchProcessor {
+public class BatchProcessor implements TaskProcessor {
     @Singular(value = "task")
     List<Task> tasks;
     @Builder.Default

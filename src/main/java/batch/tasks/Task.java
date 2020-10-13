@@ -24,7 +24,12 @@ public class Task {
         curOpIndex++;
         return isDone();
     }
-
+    public DurationWrapper getTimeTotal() {
+        return operations.stream()
+                .map(Task.Operation::getTime)
+                .reduce(DurationWrapper::plus)
+                .orElseThrow();
+    }
     @Builder
     @Getter
     @AllArgsConstructor(access = AccessLevel.PRIVATE)

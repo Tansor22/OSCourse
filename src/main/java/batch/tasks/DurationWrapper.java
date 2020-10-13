@@ -12,11 +12,11 @@ public class DurationWrapper {
     Duration duration;
     TimeUnit timeUnit;
 
-    public static DurationWrapper millis(int value) {
+    public static DurationWrapper millis(long value) {
         return new DurationWrapper(Duration.ofMillis(value), TimeUnit.MILLISECONDS);
     }
 
-    public static DurationWrapper seconds(int value) {
+    public static DurationWrapper seconds(long value) {
         return new DurationWrapper(Duration.ofSeconds(value), TimeUnit.SECONDS);
     }
 
@@ -27,6 +27,9 @@ public class DurationWrapper {
 
     public DurationWrapper plus(DurationWrapper dw) {
         return new DurationWrapper(duration.plus(dw.duration), dw.timeUnit);
+    }
+    public DurationWrapper minus(DurationWrapper dw) {
+        return new DurationWrapper(duration.minus(dw.duration), dw.timeUnit);
     }
 
     public DurationWrapper convert(DurationWrapper dw) {

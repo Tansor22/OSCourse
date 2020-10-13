@@ -18,9 +18,7 @@ public class RoundRobinTaskTest {
         RoundRobinTask roundRobinTask = RoundRobinTask.builder()
                 .task(task)
                 .build();
-        DurationWrapper timeQuantum = DurationWrapper.seconds(0);
-        DurationWrapper result = roundRobinTask.getBurstTime(timeQuantum);
-        assertEquals("7 seconds", result.toString());
+        assertEquals("7000 milliseconds", DurationWrapper.millis(roundRobinTask.getTurnAroundTime()).toString());
     }
 
     @Test
@@ -33,8 +31,7 @@ public class RoundRobinTaskTest {
         RoundRobinTask roundRobinTask = RoundRobinTask.builder()
                 .task(task)
                 .build();
-        DurationWrapper timeQuantum = DurationWrapper.seconds(0);
-        DurationWrapper result = roundRobinTask.getBurstTime(timeQuantum);
+        DurationWrapper result = DurationWrapper.millis(roundRobinTask.getBurstTime());
         assertEquals(4300, result.toMillis());
     }
 }
