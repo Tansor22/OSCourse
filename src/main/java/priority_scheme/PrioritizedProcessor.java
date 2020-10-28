@@ -28,11 +28,10 @@ public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
             // time of current operation
             long curRemBurstTime = operation.getRemainedBurstTime();
 
-
             DurationWrapper timeQuantum;
             if (tqStack.size() == 1) {
                 timeQuantum = tqStack.peek();
-                for (RestoringConfig restoringConfig: ptStack) {
+                for (RestoringConfig restoringConfig : ptStack) {
                     restoringConfig.restorePriority();
                 }
             } else {
@@ -66,26 +65,28 @@ public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
                             getTaskTag(task, operation) + " needs %d ms, it's less or equals than time quantum (%s). Process the operation...",
                             operation.getRemainedBurstTime(), timeQuantum.toString());
 
+                    if (operation.getRemainedBurstTime() < 0) {
+                        // current time quantum = time quantum - remained burst time
+                        tqStack.push(DurationWrapper.millis(Math.abs(operation.getRemainedBurstTime())));
+                    }
+
                     // interactive task, should increase priority
                     if (!task.proceed(timeQuantumMillis)) {
                         // task not done
                         task.setPriority(task.getPriority().next());
+                        if (operation.getRemainedBurstTime() < 0) {
+                            // pushes to queue of tasks demanding restoring
+                            ptStack.add(new RestoringConfig(task.getPriority(), task));
+                            // the task won't be auto selected by queue
+                            // IMPORTANT! priority shouldn't be modified after adding to queue
+                            task.setPriority(Priority.NONE);
+                        }
                         queue.add(task);
                     }
 
                     RichConsole.print(task.getDecoration(),
                             getTaskTag(task, operation) + " is fully processed! ( %s ms total)", operation.getBurstTime());
 
-                    if (operation.getRemainedBurstTime() < 0) {
-                        // current time quantum = time quantum - remained burst time
-                        tqStack.push(DurationWrapper.millis(Math.abs(operation.getRemainedBurstTime())));
-                        if (!task.isDone()) {
-                            // pushes to queue of tasks demanding restoring
-                            ptStack.add(new RestoringConfig(task.getPriority(), task));
-                            // TODO the task WILL be auto selected by queue
-                            task.setPriority(Priority.NONE);
-                        }
-                    }
                 }
             }
         }
