@@ -7,8 +7,6 @@ import rich_text.RichTextConfig;
 import round_robin.tasks.RoundRobinTask;
 import shared.QuantizedProcessor;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.LongSummaryStatistics;
 
 
@@ -17,7 +15,6 @@ public class RoundRobinProcessor extends QuantizedProcessor<RoundRobinTask> {
     @Override
     public void processTasks() {
         // initializing data required
-        List<RoundRobinTask> roundRobinTasks = new ArrayList<>(tasks);
         long timeQuantumMillis = timeQuantum.toMillis();
         // time for current task
         long currentTime = 0;
@@ -25,7 +22,7 @@ public class RoundRobinProcessor extends QuantizedProcessor<RoundRobinTask> {
         // processing
         while (true) {
             boolean done = true;
-            for (RoundRobinTask currentTask : roundRobinTasks) {
+            for (RoundRobinTask currentTask : tasks) {
                 long curRemBurstTime = currentTask.getRemainBurstTime();
                 if (curRemBurstTime > 0) {
                     // A task that should be processed has found
@@ -70,17 +67,17 @@ public class RoundRobinProcessor extends QuantizedProcessor<RoundRobinTask> {
 
         // output stats
         RichConsole.print("Tasks performed:\n", null);
-        for (RoundRobinTask roundRobinTask : roundRobinTasks) {
+        for (RoundRobinTask roundRobinTask : tasks) {
             RichConsole.print(roundRobinTask.getName() +
                             ":\n\t Burst time (ms): " + roundRobinTask.getBurstTime() +
                             "\n\t Waiting time (ms): " + roundRobinTask.getWaitingTime() +
                             "\n\t Turn around time (ms): " + roundRobinTask.getTurnAroundTime(),
                     roundRobinTask.getDecoration());
         }
-        LongSummaryStatistics waitingTimeStat = roundRobinTasks.stream()
+        LongSummaryStatistics waitingTimeStat = tasks.stream()
                 .mapToLong(RoundRobinTask::getWaitingTime)
                 .summaryStatistics();
-        LongSummaryStatistics turnAroundStat = roundRobinTasks.stream()
+        LongSummaryStatistics turnAroundStat = tasks.stream()
                 .mapToLong(RoundRobinTask::getTurnAroundTime)
                 .summaryStatistics();
         RichConsole.print("Statistic:\n\t Average waiting time (ms): " + Math.round(waitingTimeStat.getAverage()) +

@@ -5,8 +5,7 @@ import rich_text.Color;
 import rich_text.RichTextConfig;
 import tasks.DurationWrapper;
 
-import static priority_scheme.Priority.HIGH;
-import static priority_scheme.Priority.LOW;
+import static priority_scheme.Priority.*;
 import static tasks.Task.Operation.*;
 
 public class PrioritizedProcessorTest {
@@ -28,7 +27,7 @@ public class PrioritizedProcessorTest {
                         .build()
                         .init())
                 .task(PrioritizedTask.builder()
-                        .priority(HIGH)
+                        .priority(NORMAL)
                         .name("Browser Facebook Tab")
                         .decoration(RichTextConfig.builder()
                                 .color(Color.BLUE)
@@ -52,7 +51,7 @@ public class PrioritizedProcessorTest {
                         .operation(cleanUpOperation("Disposing some memory...", DurationWrapper.millis(500)))
                         .build()
                         .init())
-                .timeQuantum(DurationWrapper.seconds(3))
+                .timeQuantum(DurationWrapper.millis(300))
                 .build().processTasksTraceable();
     }
 }

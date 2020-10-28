@@ -3,77 +3,98 @@ package priority_scheme;
 import lombok.experimental.SuperBuilder;
 import rich_text.RichConsole;
 import shared.QuantizedProcessor;
+import tasks.DurationWrapper;
+import tasks.Task;
 
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Objects;
+import java.util.Queue;
+import java.util.Stack;
 
 @SuperBuilder
 public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
 
     @Override
     public void processTasks() {
-        // initializing data required
-        List<PrioritizedTask> prioritizedTasks = tasks;
-        long timeQuantumMillis = timeQuantum.toMillis();
+        Stack<DurationWrapper> tqStack = new Stack<>();
+        Queue<RestoringConfig> ptStack = new LinkedList<>();
+        tqStack.push(timeQuantum);
         // time for current task
         long currentTime = 0;
-        TaskQueue queue = new TaskQueue(prioritizedTasks);
+        TaskQueue queue = new TaskQueue(tasks);
         PrioritizedTask task;
         while (Objects.nonNull(task = queue.poll())) {
-            // time of current op
-            long curRemBurstTime = task.getOperations().get(task.getCurOpIndex()).getTime().toMillis();
+            Task.Operation operation = task.getCurrentOperation();
+            // time of current operation
+            long curRemBurstTime = operation.getRemainedBurstTime();
+
+
+            DurationWrapper timeQuantum;
+            if (tqStack.size() == 1) {
+                timeQuantum = tqStack.peek();
+                for (RestoringConfig restoringConfig: ptStack) {
+                    restoringConfig.restorePriority();
+                }
+            } else {
+                timeQuantum = tqStack.pop();
+                // should restore priority for all tasks except last pushed
+                for (int i = 0; i < ptStack.size() - 1; i++) {
+                    ptStack.poll().restorePriority();
+                }
+            }
+            long timeQuantumMillis = timeQuantum.toMillis();
+
             if (curRemBurstTime > 0) {
-                if (curRemBurstTime > timeQuantum.toMillis()) {
-                    currentTime += timeQuantum.toMillis();
+                if (curRemBurstTime > timeQuantumMillis) {
+                    currentTime += timeQuantumMillis;
                     // background task, should decrease priority
 
-                    RichConsole.print(
-                            "'" + getNameAndPriority(task) + "' is given a time quantum (" + timeQuantum.toString() + "). Process the task...",
-                            task.getDecoration());
-                    if (!task.proceed()) {
+                    RichConsole.print(task.getDecoration(),
+                            getTaskTag(task, operation) + " is given a time quantum (%s). Process the task's operation...", timeQuantum.toString());
+
+                    if (!task.proceed(timeQuantumMillis)) {
                         // task not done
                         task.setPriority(task.getPriority().prev());
                         queue.add(task);
                     }
-                    // correct 'remainBurstTime' of current task
-                    curRemBurstTime -= timeQuantumMillis;
 
-                    RichConsole.print(
-                            "'" + getNameAndPriority(task) + "'s' time is due, " + curRemBurstTime + " ms of burst time remains...",
-                            task.getDecoration());
+                    RichConsole.print(task.getDecoration(),
+                            getTaskTag(task, operation) + " interrupted, %d ms of burst time remained...", operation.getRemainedBurstTime());
 
-                    task.setRemainBurstTime(curRemBurstTime);
-                    // push back
-                    queue.add(task);
                 } else {
+                    RichConsole.print(task.getDecoration(),
+                            getTaskTag(task, operation) + " needs %d ms, it's less or equals than time quantum (%s). Process the operation...",
+                            operation.getRemainedBurstTime(), timeQuantum.toString());
+
                     // interactive task, should increase priority
-                    if (!task.proceed()) {
+                    if (!task.proceed(timeQuantumMillis)) {
                         // task not done
                         task.setPriority(task.getPriority().next());
                         queue.add(task);
                     }
-                    // grab remain burst time
-                    currentTime += curRemBurstTime;
 
-                    RichConsole.print(
-                            "'" + getNameAndPriority(task) + "' needs " + curRemBurstTime + " ms, it's  equal or less than time quantum (" + timeQuantum.toString() + "). Process the task...",
-                            task.getDecoration());
+                    RichConsole.print(task.getDecoration(),
+                            getTaskTag(task, operation) + " is fully processed! ( %s ms total)", operation.getBurstTime());
 
-                    // waiting time is current time minus time
-                    task.setWaitingTime(currentTime - task.getBurstTime());
-
-                    RichConsole.print(
-                            "'" + task.getName() + "' is fully processed! (" + task.getBurstTime() + " ms total)",
-                            task.getDecoration());
-
-                    // mark the task as processed
-                    task.setRemainBurstTime(0);
+                    if (operation.getRemainedBurstTime() < 0) {
+                        // current time quantum = time quantum - remained burst time
+                        tqStack.push(DurationWrapper.millis(Math.abs(operation.getRemainedBurstTime())));
+                        if (!task.isDone()) {
+                            // pushes to queue of tasks demanding restoring
+                            ptStack.add(new RestoringConfig(task.getPriority(), task));
+                            // TODO the task WILL be auto selected by queue
+                            task.setPriority(Priority.NONE);
+                        }
+                    }
                 }
             }
         }
     }
 
-    private String getNameAndPriority(PrioritizedTask task) {
-        return String.format("%s (%s priority)", task.getName(), task.getPriority());
+    private String getTaskTag(PrioritizedTask task, Task.Operation operation) {
+        return String.format("'%s - %s priority : %s - %d remained burst time (ms)'",
+                task.getName(), task.getPriority(), operation.getName(),
+                operation.getRemainedBurstTime() < 0 ? 0 : operation.getRemainedBurstTime()
+        );
     }
 }

@@ -23,24 +23,47 @@ public class Task {
         return curOpIndex >= operations.size();
     }
 
-    public boolean proceed() {
-        curOpIndex++;
+    public boolean proceed(long time) {
+        if ((getCurrentOperation().remainedBurstTime -= time) <= 0) {
+            // operation is done
+            curOpIndex++;
+        }
         return isDone();
     }
+    public boolean proceed() {
+        return proceed(getCurrentOperation().burstTime);
+    }
+
+    public Operation getCurrentOperation() {
+        return operations.get(curOpIndex);
+    }
+
     public DurationWrapper getTimeTotal() {
         return operations.stream()
                 .map(Task.Operation::getTime)
                 .reduce(DurationWrapper::plus)
                 .orElse(DurationWrapper.millis(0));
     }
-    @Builder
+
     @Getter
-    @AllArgsConstructor(access = AccessLevel.PRIVATE)
     public static class Operation {
         String name;
         String operationDescription;
         String interruptionDescription;
         DurationWrapper time;
+        long burstTime;
+        long remainedBurstTime;
+
+        @Builder
+        private Operation(String name, String operationDescription, String interruptionDescription, DurationWrapper time) {
+            this.name = name;
+            this.operationDescription = operationDescription;
+            this.interruptionDescription = interruptionDescription;
+            this.time = time;
+            this.burstTime = time.toMillis();
+            this.remainedBurstTime = burstTime;
+        }
+
 
         public static Operation defaultOperation(DurationWrapper time) {
             return Operation.builder()
@@ -68,6 +91,7 @@ public class Task {
                     .operationDescription(partDescription)
                     .build();
         }
+
         public static Operation guiOperation(String partDescription, DurationWrapper time) {
             return Operation.builder()
                     .name("GUI operation")
@@ -76,6 +100,7 @@ public class Task {
                     .operationDescription(partDescription)
                     .build();
         }
+
         public static Operation cleanUpOperation(String partDescription, DurationWrapper time) {
             return Operation.builder()
                     .name("Clean up operation")

@@ -9,6 +9,7 @@ import java.util.Random;
 @AllArgsConstructor
 @Getter
 public enum Priority {
+    NONE(Integer.MIN_VALUE),
     LOW(0),
     NORMAL(1),
     HIGH(2);
@@ -22,23 +23,18 @@ public enum Priority {
         return VALUES.get(RANDOM.nextInt(SIZE));
     }
 
-    public static Priority valueOf(int intValue) {
-        return switch (intValue) {
-            case 0 -> LOW;
-            case 1 -> NORMAL;
-            default -> HIGH;
-        };
-    }
     public  Priority next() {
         return switch (this) {
             case LOW -> NORMAL;
             case NORMAL, HIGH -> HIGH;
+            case NONE -> NONE;
         };
     }
     public  Priority prev() {
         return switch (this) {
             case LOW, NORMAL -> LOW;
             case HIGH -> NORMAL;
+            case NONE -> NONE;
         };
     }
 }
