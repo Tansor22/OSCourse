@@ -1,23 +1,21 @@
 package batch;
 
-import batch.tasks.Task;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Singular;
+import lombok.experimental.SuperBuilder;
 import rich_text.RichConsole;
 import rich_text.RichTextConfig;
 import shared.TaskProcessor;
+import tasks.Task;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;
 
-@Builder
+@SuperBuilder
 @Getter
-public class BatchProcessor implements TaskProcessor {
-    @Singular(value = "task")
-    List<Task> tasks;
+public class BatchProcessor extends TaskProcessor<Task> {
     @Builder.Default
     int curTaskIndex = BatchConstants.PLAIN_RND_SELECTION;
 
@@ -29,7 +27,6 @@ public class BatchProcessor implements TaskProcessor {
             Task.Operation operation = task.getOperations().get(task.getCurOpIndex());
             // performing task part
             RichConsole.print("Switched to task '" + task.getName() + "': '" + operation.getName() + "' - " + operation.getOperationDescription(), task.getDecoration());
-            perform(operation);
             // task part performed
             RichConsole.print("'" + operation.getName() + "' of '" + task.getName() + "' is done!", task.getDecoration());
             if (task.proceed()) {
@@ -47,14 +44,6 @@ public class BatchProcessor implements TaskProcessor {
     private void postTaskProcessed(List<Task> tasks) {
         tasks.remove(curTaskIndex);
         curTaskIndex = BatchConstants.PLAIN_RND_SELECTION;
-    }
-
-    private static void perform(Task.Operation operation) {
-        try {
-            Thread.sleep(operation.getTime().toMillis());
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
     }
 
     private boolean noSpecialSelectionRequired(List<Task> tasks) {

@@ -1,12 +1,15 @@
-package batch.tasks;
+package tasks;
 
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 import rich_text.RichTextConfig;
 
 import java.util.List;
 
-@Builder
+@SuperBuilder
 @Getter
+@NoArgsConstructor
+@ToString
 public class Task {
     String name;
     @Singular(value = "operation")
@@ -28,7 +31,7 @@ public class Task {
         return operations.stream()
                 .map(Task.Operation::getTime)
                 .reduce(DurationWrapper::plus)
-                .orElseThrow();
+                .orElse(DurationWrapper.millis(0));
     }
     @Builder
     @Getter

@@ -1,13 +1,15 @@
-package batch.tasks;
+package tasks;
 
 import batch.BatchConstants;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 
 import java.time.Duration;
 import java.util.concurrent.TimeUnit;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
+@EqualsAndHashCode
 public class DurationWrapper {
     Duration duration;
     TimeUnit timeUnit;

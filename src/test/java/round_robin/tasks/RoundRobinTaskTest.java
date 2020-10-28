@@ -1,36 +1,30 @@
 package round_robin.tasks;
 
-import batch.tasks.DurationWrapper;
-import batch.tasks.Task;
 import org.junit.Test;
+import tasks.DurationWrapper;
+import tasks.Task;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class RoundRobinTaskTest {
 
     @Test
     public void getBurstTimeSimpleTest() {
-        Task task = Task.builder()
+        RoundRobinTask roundRobinTask = RoundRobinTask.builder()
                 .operation(Task.Operation.defaultOperation(DurationWrapper.seconds(2)))
                 .operation(Task.Operation.defaultOperation(DurationWrapper.seconds(3)))
                 .operation(Task.Operation.defaultOperation(DurationWrapper.seconds(2)))
-                .build();
-        RoundRobinTask roundRobinTask = RoundRobinTask.builder()
-                .task(task)
-                .build();
+                .build().init();
         assertEquals("7000 milliseconds", DurationWrapper.millis(roundRobinTask.getTurnAroundTime()).toString());
     }
 
     @Test
     public void getBurstTimeComplexTest() {
-        Task task = Task.builder()
+        RoundRobinTask roundRobinTask = RoundRobinTask.builder()
                 .operation(Task.Operation.defaultOperation(DurationWrapper.seconds(2)))
                 .operation(Task.Operation.defaultOperation(DurationWrapper.millis(300)))
                 .operation(Task.Operation.defaultOperation(DurationWrapper.seconds(2)))
-                .build();
-        RoundRobinTask roundRobinTask = RoundRobinTask.builder()
-                .task(task)
-                .build();
+                .build().init();
         DurationWrapper result = DurationWrapper.millis(roundRobinTask.getBurstTime());
         assertEquals(4300, result.toMillis());
     }

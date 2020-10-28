@@ -1,17 +1,21 @@
-import batch.BatchProcessor;
-import batch.tasks.DurationWrapper;
-import batch.tasks.Task;
+package priority_scheme;
+
+import org.junit.Test;
 import rich_text.Color;
 import rich_text.RichTextConfig;
-import round_robin.RoundRobinProcessor;
-import round_robin.tasks.RoundRobinTask;
+import tasks.DurationWrapper;
 
-import static batch.tasks.Task.Operation.*;
+import static priority_scheme.Priority.HIGH;
+import static priority_scheme.Priority.LOW;
+import static tasks.Task.Operation.*;
 
-public class Runner {
-    public static void main(String[] args) {
-        RoundRobinProcessor.builder()
-                .task(Task.builder()
+public class PrioritizedProcessorTest {
+
+    @Test
+    public void processTasks() {
+        PrioritizedProcessor.builder()
+                .task(PrioritizedTask.builder()
+                        .priority(HIGH)
                         .name("Browser Google Tab")
                         .decoration(RichTextConfig.builder()
                                 .color(Color.YELLOW)
@@ -21,8 +25,10 @@ public class Runner {
                         .operation(networkOperation("Requesting www.google.com", DurationWrapper.seconds(2)))
                         .operation(calculationOperation("Preparing response", DurationWrapper.millis(700)))
                         .operation(cleanUpOperation("Disposing socket connection", DurationWrapper.millis(300)))
-                        .build())
-                .task(Task.builder()
+                        .build()
+                        .init())
+                .task(PrioritizedTask.builder()
+                        .priority(HIGH)
                         .name("Browser Facebook Tab")
                         .decoration(RichTextConfig.builder()
                                 .color(Color.BLUE)
@@ -31,8 +37,10 @@ public class Runner {
                         .operation(networkOperation("Requesting www.facebook.com", DurationWrapper.seconds(2)))
                         .operation(calculationOperation("Preparing response", DurationWrapper.millis(500)))
                         .operation(cleanUpOperation("Disposing socket connection", DurationWrapper.millis(500)))
-                        .build())
-                .task(Task.builder()
+                        .build()
+                        .init())
+                .task(PrioritizedTask.builder()
+                        .priority(LOW)
                         .name("Bitcoin Mining")
                         .decoration(RichTextConfig.builder()
                                 .color(Color.RED)
@@ -42,8 +50,9 @@ public class Runner {
                         .operation(calculationOperation("Hash finding, second try...", DurationWrapper.seconds(2)))
                         .operation(calculationOperation("Hash finding, third try...", DurationWrapper.millis(500)))
                         .operation(cleanUpOperation("Disposing some memory...", DurationWrapper.millis(500)))
-                        .build())
+                        .build()
+                        .init())
                 .timeQuantum(DurationWrapper.seconds(3))
-                .build().processTasks();
+                .build().processTasksTraceable();
     }
 }

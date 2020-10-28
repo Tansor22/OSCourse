@@ -1,24 +1,27 @@
 package round_robin.tasks;
 
-import batch.tasks.Task;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
+import lombok.experimental.SuperBuilder;
+import tasks.Task;
 
 @Getter
 @Setter
-public class RoundRobinTask {
-    Task task;
+@ToString
+@SuperBuilder
+public class RoundRobinTask extends Task {
     long burstTime;
     long remainBurstTime;
     long waitingTime;
     long turnAroundTime;
 
-    @Builder
-    public RoundRobinTask(Task task) {
-        this.task = task;
-        this.burstTime = task.getTimeTotal().toMillis();
+
+    @SuppressWarnings("unchecked")
+    public <T extends RoundRobinTask> T init() {
+        this.burstTime = getTimeTotal().toMillis();
         this.remainBurstTime = this.burstTime;
+        return (T) this;
     }
 
     public long getTurnAroundTime() {

@@ -1,8 +1,8 @@
 package batch;
 
-import batch.tasks.DurationWrapper;
-import batch.tasks.Task;
 import org.junit.Test;
+import tasks.DurationWrapper;
+import tasks.Task;
 
 import static org.junit.Assert.assertEquals;
 
