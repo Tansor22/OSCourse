@@ -19,7 +19,7 @@ public class RoundRobinTask extends Task {
 
     @SuppressWarnings("unchecked")
     public <T extends RoundRobinTask> T init() {
-        this.burstTime = getTimeTotal().toMillis();
+        this.burstTime = getTimeTotal().getMillis();
         this.remainBurstTime = this.burstTime;
         return (T) this;
     }

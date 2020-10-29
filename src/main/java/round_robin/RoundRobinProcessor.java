@@ -15,7 +15,7 @@ public class RoundRobinProcessor extends QuantizedProcessor<RoundRobinTask> {
     @Override
     public void processTasks() {
         // initializing data required
-        long timeQuantumMillis = timeQuantum.toMillis();
+        long timeQuantumMillis = initTimeQuantum.getMillis();
         // time for current task
         long currentTime = 0;
 
@@ -27,11 +27,11 @@ public class RoundRobinProcessor extends QuantizedProcessor<RoundRobinTask> {
                 if (curRemBurstTime > 0) {
                     // A task that should be processed has found
                     done = false;
-                    if (curRemBurstTime > timeQuantum.toMillis()) {
-                        currentTime += timeQuantum.toMillis();
+                    if (curRemBurstTime > initTimeQuantum.getMillis()) {
+                        currentTime += initTimeQuantum.getMillis();
 
                         RichConsole.print(
-                                "'" + currentTask.getName() + "' is given a time quantum (" + timeQuantum.toString() + "). Process the task...",
+                                "'" + currentTask.getName() + "' is given a time quantum (" + initTimeQuantum.toString() + "). Process the task...",
                                 currentTask.getDecoration());
 
                         // correct 'remainBurstTime' of current task
@@ -47,7 +47,7 @@ public class RoundRobinProcessor extends QuantizedProcessor<RoundRobinTask> {
                         currentTime += curRemBurstTime;
 
                         RichConsole.print(
-                                "'" + currentTask.getName() + "' needs " + curRemBurstTime +" ms, it's  equal or less than time quantum (" + timeQuantum.toString() + "). Process the task...",
+                                "'" + currentTask.getName() + "' needs " + curRemBurstTime +" ms, it's  equal or less than time quantum (" + initTimeQuantum.toString() + "). Process the task...",
                                 currentTask.getDecoration());
 
                         // waiting time is current time minus time

@@ -60,7 +60,7 @@ public class Task {
             this.operationDescription = operationDescription;
             this.interruptionDescription = interruptionDescription;
             this.time = time;
-            this.burstTime = time.toMillis();
+            this.burstTime = time.getMillis();
             this.remainedBurstTime = burstTime;
         }
 

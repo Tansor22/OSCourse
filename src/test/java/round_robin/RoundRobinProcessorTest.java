@@ -48,7 +48,7 @@ public class RoundRobinProcessorTest {
                         .operation(cleanUpOperation("Disposing some memory...", DurationWrapper.millis(500)))
                         .build()
                         .init())
-                .timeQuantum(DurationWrapper.seconds(3))
+                .initTimeQuantum(DurationWrapper.seconds(3))
                 .build().processTasksTraceable();
     }
 }

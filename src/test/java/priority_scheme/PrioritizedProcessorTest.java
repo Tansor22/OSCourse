@@ -51,7 +51,7 @@ public class PrioritizedProcessorTest {
                         .operation(cleanUpOperation("Disposing some memory...", DurationWrapper.millis(500)))
                         .build()
                         .init())
-                .timeQuantum(DurationWrapper.millis(300))
+                .initTimeQuantum(DurationWrapper.millis(300))
                 .build().processTasksTraceable();
     }
 }

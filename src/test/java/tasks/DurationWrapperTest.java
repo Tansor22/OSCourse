@@ -33,7 +33,7 @@ public class DurationWrapperTest {
         DurationWrapper dw1 = DurationWrapper.seconds(5);
         DurationWrapper dw2 = DurationWrapper.millis(500);
         DurationWrapper result = dw2.plus(dw1);
-        assertEquals(5500, result.toMillis());
+        assertEquals(5500, result.getMillis());
     }
     @Test
     public void subtractionSimpleTest() {
@@ -47,7 +47,7 @@ public class DurationWrapperTest {
         DurationWrapper dw1 = DurationWrapper.seconds(5);
         DurationWrapper dw2 = DurationWrapper.millis(500);
         DurationWrapper result = dw2.minus(dw1);
-        assertEquals(-4500, result.toMillis());
+        assertEquals(-4500, result.getMillis());
     }
     @Test
     public void convertTest() {

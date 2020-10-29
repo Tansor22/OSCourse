@@ -26,6 +26,6 @@ public class RoundRobinTaskTest {
                 .operation(Task.Operation.defaultOperation(DurationWrapper.seconds(2)))
                 .build().init();
         DurationWrapper result = DurationWrapper.millis(roundRobinTask.getBurstTime());
-        assertEquals(4300, result.toMillis());
+        assertEquals(4300, result.getMillis());
     }
 }

@@ -56,7 +56,7 @@ public class TaskQueueTest {
                 new Priority[]{HIGH, NORMAL, LOW, NONE};
 
         assertArrayEquals("Queue isn't sorted correctly.",
-                queue.getQueue().stream()
+                queue._queue.stream()
                         .map(PrioritizedTask::getPriority)
                         .toArray(Priority[]::new), expectedOrdering);
 
@@ -67,7 +67,7 @@ public class TaskQueueTest {
         task.setPriority(NONE);
 
         assertNotEquals("Queue ordering wasn't broken.",
-                queue.getQueue().stream()
+                queue._queue.stream()
                         .map(PrioritizedTask::getPriority)
                         .toArray(Priority[]::new), expectedOrdering);
     }
