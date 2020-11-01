@@ -14,56 +14,51 @@ public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
 
     @Override
     public void processTasks() {
-        // functional elements of priority scheme
-        PrioritizedProcessorState state = new PrioritizedProcessorState(initTimeQuantum);
-        TaskQueue queue = new TaskQueue(tasks);
-
+        // functional element of priority scheme
+        PrioritizedProcessorState state = new PrioritizedProcessorState(initTimeQuantum, new TaskQueue(tasks));
         // total time of work
         long currentTime = 0;
         PrioritizedTask task;
-        while (Objects.nonNull(task = queue.poll())) {
+        while (Objects.nonNull(task = state.getTaskQueue().poll())) {
             // current time
             DurationWrapper timeQuantum = state.getCurrentTimeQuantum();
             long timeQuantumMillis = timeQuantum.getMillis();
             // current operation time
             Task.Operation operation = task.getCurrentOperation();
             long curRemBurstTime = operation.getRemainedBurstTime();
+            boolean isTimeQuantumSpent = curRemBurstTime >= timeQuantumMillis;
+            if (curRemBurstTime > timeQuantumMillis) {
+                currentTime += timeQuantumMillis;
 
-            if (curRemBurstTime > 0) {
-                if (curRemBurstTime > timeQuantumMillis) {
-                    currentTime += timeQuantumMillis;
+                print(task.getDecoration(),
+                        getTaskTag(task, operation, state) + " is given a time quantum (%s). Process the task's operation...", timeQuantum.toString());
+
+                if (!task.proceed(timeQuantumMillis)) {
+                    // task not done
                     // background task, should decrease priority
-
-                    print(task.getDecoration(),
-                            getTaskTag(task, operation, state) + " is given a time quantum (%s). Process the task's operation...", timeQuantum.toString());
-
-                    if (!task.proceed(timeQuantumMillis)) {
-                        // task not done
-                        task.setPriority(task.getPriority().prev());
-                        queue.add(task);
-                    }
-
-                    print(task.getDecoration(),
-                            getTaskTag(task, operation, state) + " interrupted, %d ms of burst time remained...", operation.getRemainedBurstTime());
-
-                } else {
-                    print(task.getDecoration(),
-                            getTaskTag(task, operation, state) + " needs %d ms, it's less or equals than time quantum (%s). Process the operation...",
-                            operation.getRemainedBurstTime(), timeQuantum.toString());
-
-                    currentTime += curRemBurstTime;
-
-                    if (!task.proceed(timeQuantumMillis)) {
-                        task.setPriority(task.getPriority().next());
-                    }
-
-                    state.handlePostProceed(task, operation, queue);
-
-                    print(task.getDecoration(),
-                            getTaskTag(task, operation, state) + " is fully processed! ( %s ms total)", operation.getBurstTime());
-
+                    task.setPriority(task.getPriority().prev());
                 }
+
+                print(task.getDecoration(),
+                        getTaskTag(task, operation, state) + " interrupted, %d ms of burst time remained...", operation.getRemainedBurstTime());
+
+            } else {
+                print(task.getDecoration(),
+                        getTaskTag(task, operation, state) + " needs %d ms, it's less or equals than time quantum (%s). Process the operation...",
+                        operation.getRemainedBurstTime(), timeQuantum.toString());
+
+                currentTime += curRemBurstTime;
+
+                if (!task.proceed(timeQuantumMillis)) {
+                    task.setPriority(task.getPriority().next());
+                }
+
+
+                print(task.getDecoration(),
+                        getTaskTag(task, operation, state) + " is fully processed! ( %s ms total)", operation.getBurstTime());
+
             }
+            state.handlePostProceed(isTimeQuantumSpent, task, operation);
         }
     }
 

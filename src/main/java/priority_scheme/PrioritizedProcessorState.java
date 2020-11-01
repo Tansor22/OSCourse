@@ -1,5 +1,6 @@
 package priority_scheme;
 
+import lombok.Getter;
 import rich_text.RichConsole;
 import tasks.DurationWrapper;
 import tasks.Task;
@@ -13,47 +14,44 @@ public class PrioritizedProcessorState {
     private final Deque<DurationWrapper> _deque = new ArrayDeque<>(2);
     Priority priority;
     PrioritizedTask coveredTask;
+    @Getter
+    TaskQueue taskQueue;
 
-    public PrioritizedProcessorState(DurationWrapper initialTimeQuantum) {
+    public PrioritizedProcessorState(DurationWrapper initialTimeQuantum, TaskQueue taskQueue) {
         _deque.push(initialTimeQuantum);
+        this.taskQueue = taskQueue;
     }
 
     public DurationWrapper getCurrentTimeQuantum() {
+        discoverTask();
         if (_deque.size() == 1) {
-            discoverTask();
             return _deque.peek();
         } else {
             return _deque.poll();
         }
     }
 
-    public void handlePostProceed(PrioritizedTask task, Task.Operation operation, TaskQueue queue) {
-        boolean isNotAllTimeSpent = operation.getRemainedBurstTime() < 0;
-        if (isNotAllTimeSpent) {
+    public void handlePostProceed(boolean isTimeQuantumSpent, PrioritizedTask task, Task.Operation operation) {
+        if (!isTimeQuantumSpent) {
             _deque.push(DurationWrapper.millis(Math.abs(operation.getRemainedBurstTime())));
         }
         if (!task.isDone()) {
-            if (isNotAllTimeSpent) {
-                coverTask(task, queue);
-            } else {
-                queue.add(task);
-            }
+            coverTask(task);
         }
     }
 
     /**
-     * Shadows task, so the task won't be auto selected by queue
+     * Shadows task, so the task won't be auto selected by taskQueue
      *
      * @param task  Task to be shadowed.
-     * @param queue Queue to hold the task.
      */
-    private void coverTask(PrioritizedTask task, TaskQueue queue) {
+    private void coverTask(PrioritizedTask task) {
         discoverTask();
         coveredTask = task;
         priority = task.getPriority();
-        // IMPORTANT! priority shouldn't be modified after adding to queue
+        // IMPORTANT! priority shouldn't be modified after adding to taskQueue
         coveredTask.setPriority(Priority.NONE);
-        queue.add(coveredTask);
+        taskQueue.add(coveredTask);
         RichConsole.print(coveredTask.getDecoration(), " '%s' has been covered from task processor",
                 coveredTask.getName(), priority);
     }
