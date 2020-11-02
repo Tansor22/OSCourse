@@ -34,6 +34,8 @@ public class PrioritizedProcessorState {
     public void handlePostProceed(boolean isTimeQuantumSpent, PrioritizedTask task, Task.Operation operation) {
         if (!isTimeQuantumSpent) {
             _deque.push(DurationWrapper.millis(Math.abs(operation.getRemainedBurstTime())));
+            // remained burt time should never be used
+            operation.setRemainedBurstTime(0);
         }
         if (!task.isDone()) {
             coverTask(task);

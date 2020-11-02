@@ -5,6 +5,7 @@ import lombok.experimental.SuperBuilder;
 import rich_text.RichTextConfig;
 
 import java.util.List;
+import java.util.Optional;
 
 @SuperBuilder
 @Getter
@@ -30,12 +31,17 @@ public class Task {
         }
         return isDone();
     }
+
     public boolean proceed() {
         return proceed(getCurrentOperation().burstTime);
     }
 
     public Operation getCurrentOperation() {
         return operations.get(curOpIndex);
+    }
+
+    public Optional<Operation> getPreviousOperation() {
+        return curOpIndex - 1 >= 0 ? Optional.of(operations.get(curOpIndex - 1)) : Optional.empty();
     }
 
     public DurationWrapper getTimeTotal() {
@@ -52,6 +58,10 @@ public class Task {
         String interruptionDescription;
         DurationWrapper time;
         long burstTime;
+        long turnAroundTime;
+        @Setter
+        long waitingTime;
+        @Setter
         long remainedBurstTime;
 
         @Builder
@@ -64,6 +74,9 @@ public class Task {
             this.remainedBurstTime = burstTime;
         }
 
+        public long getTurnAroundTime() {
+            return burstTime + waitingTime;
+        }
 
         public static Operation defaultOperation(DurationWrapper time) {
             return Operation.builder()
