@@ -1,8 +1,22 @@
 plugins {
-    id 'java'
+    id 'java-library'
+    id 'maven-publish'
 }
 
+group = 'ru.astu.os_course'
 version '1.0-SNAPSHOT'
+
+java {
+    modularity.inferModulePath = true
+}
+
+publishing {
+    publications {
+        OSCourse(MavenPublication) {
+            from components.java
+        }
+    }
+}
 
 repositories {
     mavenCentral()

@@ -31,11 +31,11 @@ public class DurationWrapper implements Comparable<DurationWrapper>, Cloneable {
     }
 
     public DurationWrapper plus(DurationWrapper dw) {
-        return new DurationWrapper(duration.plus(dw.duration), dw.timeUnit, dw.millis);
+        return new DurationWrapper(duration.plus(dw.duration), dw.timeUnit, millis + dw.millis);
     }
 
     public DurationWrapper minus(DurationWrapper dw) {
-        return new DurationWrapper(duration.minus(dw.duration), dw.timeUnit, dw.millis);
+        return new DurationWrapper(duration.minus(dw.duration), dw.timeUnit, millis - dw.millis);
     }
 
     public DurationWrapper convert(DurationWrapper dw) {
