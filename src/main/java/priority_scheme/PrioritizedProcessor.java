@@ -10,6 +10,7 @@ import tasks.Task;
 
 import java.util.LongSummaryStatistics;
 import java.util.Objects;
+import java.util.function.ToLongFunction;
 
 import static rich_text.RichConsole.print;
 
@@ -21,7 +22,7 @@ public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
         // functional element of priority scheme
         PrioritizedProcessorState state = new PrioritizedProcessorState(initTimeQuantum, new TaskQueue(tasks));
         // total time of work
-        long currentTime = 0;
+        processingTime = 0;
         PrioritizedTask task;
         while (Objects.nonNull(task = state.getTaskQueue().poll())) {
             // current time
@@ -32,7 +33,7 @@ public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
             long curRemBurstTime = operation.getRemainedBurstTime();
             boolean isTimeQuantumSpent = curRemBurstTime >= timeQuantumMillis;
             if (curRemBurstTime > timeQuantumMillis) {
-                currentTime += timeQuantumMillis;
+                processingTime += timeQuantumMillis;
 
                 print(task.getDecoration(),
                         getTaskTag(task, operation, state) + " is given a time quantum (%s). Process the task's operation...", timeQuantum.toString());
@@ -51,15 +52,15 @@ public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
                         getTaskTag(task, operation, state) + " needs %d ms, it's less or equals than time quantum (%s). Process the operation...",
                         operation.getRemainedBurstTime(), timeQuantum.toString());
 
-                currentTime += curRemBurstTime;
+                processingTime += curRemBurstTime;
 
                 // IMPORTANT: before proceed
                 // should correct total waiting time,
                 // so it doesnt seem like operations waits since starting task processing
-                long totalWaitingTime = currentTime - operation.getBurstTime();
+                long totalWaitingTime = processingTime - operation.getBurstTime();
                 long prevOperationTurnAroundTime = task.getPreviousOperation()
-                                .map(Task.Operation::getTurnAroundTime)
-                                .orElse(0L);
+                        .map(Task.Operation::getTurnAroundTime)
+                        .orElse(0L);
                 operation.setWaitingTime(totalWaitingTime - prevOperationTurnAroundTime);
 
                 if (!task.proceed(timeQuantumMillis)) {
@@ -75,6 +76,13 @@ public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
         printStatistics();
     }
 
+    private LongSummaryStatistics getStatistics(ToLongFunction<Task.Operation> operationMapper) {
+        return tasks.stream()
+                .flatMap(task -> task.getOperations().stream())
+                .mapToLong(operationMapper)
+                .summaryStatistics();
+    }
+
     private void printStatistics() {
         RichConsole.print("Tasks performed:\n", null);
         for (PrioritizedTask task : tasks) {
@@ -88,14 +96,9 @@ public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
                         task.getDecoration());
             }
         }
-        LongSummaryStatistics waitingTimeStat = tasks.stream()
-                .flatMap(task -> task.getOperations().stream())
-                .mapToLong(Task.Operation::getWaitingTime)
-                .summaryStatistics();
-        LongSummaryStatistics turnAroundStat = tasks.stream()
-                .flatMap(task -> task.getOperations().stream())
-                .mapToLong(Task.Operation::getTurnAroundTime)
-                .summaryStatistics();
+        LongSummaryStatistics waitingTimeStat = getStatistics(Task.Operation::getWaitingTime);
+        LongSummaryStatistics turnAroundStat = getStatistics(Task.Operation::getTurnAroundTime);
+
         RichConsole.print("Statistics:\n\t Average waiting time (ms): " + Math.round(waitingTimeStat.getAverage()) +
                         "\n\t Max waiting time (ms): " + Math.round(waitingTimeStat.getMax()) +
                         "\n\t Min waiting time (ms): " + Math.round(waitingTimeStat.getMin()) +
