@@ -12,6 +12,10 @@ public class RichConsole {
         print(String.format(message, substitutions), config);
     }
 
+    public static void newLine() {
+        System.out.println();
+    }
+
     public static void print(String message, RichTextConfig config) {
         StringBuilder target = new StringBuilder();
         Optional.ofNullable(config)

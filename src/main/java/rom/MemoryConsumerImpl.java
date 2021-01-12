@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Random;
 
 @SuperBuilder
-public class PlainMemoryConsumer extends MemoryConsumer {
+public class MemoryConsumerImpl extends MemoryConsumer {
     List<MemoryChunk> _taskQueue;
 
     @Override
@@ -17,15 +17,33 @@ public class PlainMemoryConsumer extends MemoryConsumer {
         _taskQueue = new ArrayList<>();
         int taskCount = 0;
         int timer = 0;
-        float addingPercentage = .4f;
-        boolean isMemoryDisposed = true;
+        boolean isMemoryDisposed = false;
         while (taskCount <= taskLimit()) {
             timer++;
+            if (isMemoryDisposed && defragmentationEnabled()) {
+                // performing defragmentation
+                RichConsole.print("\tMemory state before defragmentation: ", RichTextConfig.metaMessageStyle());
+                new PictureMemoryPrinter().print(memory);
 
+                int totalFreeMemorySize = memory.stream()
+                        .filter(MemoryChunk::isFree)
+                        .mapToInt(MemoryChunk::size)
+                        .reduce(Integer::sum)
+                        .orElse(0);
+
+                memory.removeIf(MemoryChunk::isFree);
+                memory.add(MemoryChunk.builder()
+                        .label("free")
+                        .timeRemain(0)
+                        .size(totalFreeMemorySize)
+                        .build());
+                RichConsole.print("\tMemory state after defragmentation: ", RichTextConfig.metaMessageStyle());
+                new PictureMemoryPrinter().print(memory);
+            }
             boolean isTaskAdded = false;
             // roll for adding, by default consider no new task
             String newTaskAppearingStatus = "There is no task appeared...";
-            if (Math.random() <= addingPercentage) {
+            if (Math.random() <= taskAppearingPercentage()) {
                 taskCount++;
                 final MemoryChunk newChunk = getRandomMemoryChunk(taskCount);
                 newTaskAppearingStatus = "New task for processing appeared - " + newChunk.toString();
@@ -35,7 +53,7 @@ public class PlainMemoryConsumer extends MemoryConsumer {
                 }
                 if (!isTaskAdded) {
                     // add to queue
-                    newTaskAppearingStatus += ". Not enough memory to process it, putting it ti task queue...";
+                    newTaskAppearingStatus += ". Not enough memory to process it, putting it to task queue...";
                     _taskQueue.add(newChunk);
                 }
             }
@@ -43,16 +61,11 @@ public class PlainMemoryConsumer extends MemoryConsumer {
                     .decoration(Decoration.UNDERLINE)
                     .build());
             while (!_taskQueue.isEmpty()) {
-                RichConsole.print("Trying to get task from queue...", RichTextConfig.builder()
-                        .decoration(Decoration.UNDERLINE)
-                        .build());
+                RichConsole.print("Trying to get task from queue...", RichTextConfig.metaMessageStyle());
                 MemoryChunk chunkFromQueue = _taskQueue.get(0);
                 isTaskAdded = tryAddTask(chunkFromQueue, memory);
 
-                if (isMemoryDisposed) {
-                    isMemoryDisposed = false;
-                    // defragmentation
-                }
+
                 // by default consider there is not enough memory
                 String taskAddingFromQueueStatus = "Not enough memory for processing task from queue - " + chunkFromQueue.toString();
                 if (isTaskAdded) {
@@ -68,38 +81,22 @@ public class PlainMemoryConsumer extends MemoryConsumer {
                     break;
                 }
             }
-            cleanUp(memory);
-            // output ...
+            isMemoryDisposed = workPerformed(memory);
+            // tracking
             RichConsole.print(RichTextConfig.builder()
                     .decoration(Decoration.UNDERLINE)
                     .build(), "Time tick: %s, queue size: %s", timer, _taskQueue.size());
 
             // chunks as data structures
-            for (MemoryChunk chunk : memory) {
-                RichTextConfig rtc = RichTextConfig.builder()
-                        .color(chunk.isFree() ? Color.GREEN : Color.RED)
-                        .newLine(false)
-                        .build();
-                RichConsole.print(chunk.toString() + " ", rtc);
-            }
-
-            RichConsole.print("\n_________________________________", null);
-            // chunks as stars
-            for (MemoryChunk chunk : memory) {
-                RichTextConfig rtc = RichTextConfig.builder()
-                        .color(Color.BLACK)
-                        .background(chunk.isFree() ? Background.GREEN : Background.RED)
-                        .newLine(false)
-                        .build();
-                String chunkAsStars = "X".repeat(Math.max(0, (int) Math.ceil(chunk.size() / 10d)));
-                RichConsole.print(chunkAsStars, rtc);
-                RichConsole.print("", null);
-            }
+            new PojoMemoryPrinter().print(memory);
+            // chunks as picture
+            new PictureMemoryPrinter().print(memory);
             RichConsole.print("\n_________________________________", null);
         }
     }
 
-    private void cleanUp(List<MemoryChunk> memory) {
+    private boolean workPerformed(List<MemoryChunk> memory) {
+        boolean isMemoryDisposed = false;
         for (MemoryChunk chunk : memory) {
             // find suitable chunks and mark them as 'free'
             if (!chunk.isFree()) {
@@ -107,6 +104,7 @@ public class PlainMemoryConsumer extends MemoryConsumer {
                 if (chunk.timeRemain() <= 0) {
                     chunk.timeRemain(0);
                     chunk.label("free");
+                    isMemoryDisposed = true;
                 }
             }
         }
@@ -120,6 +118,7 @@ public class PlainMemoryConsumer extends MemoryConsumer {
                 memory.remove(next);
             }
         }
+        return isMemoryDisposed;
     }
 
 

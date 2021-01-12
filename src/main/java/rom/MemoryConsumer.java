@@ -19,6 +19,14 @@ public abstract class MemoryConsumer implements Consumer<List<MemoryChunk>> {
     List<MemoryChunk> _memory;
     @Builder.Default
     int _taskLimit = 50;
+    @Builder.Default
+    float _taskAppearingPercentage = .2f;
+    @Builder.Default
+    IntRange _sizeRange = new IntRange(15, 75);
+    @Builder.Default
+    IntRange _timeRange = new IntRange(15, 75);
+    @Builder.Default
+    boolean _defragmentationEnabled = true;
 
     public final void consume() {
         accept(new ArrayList<>(_memory));

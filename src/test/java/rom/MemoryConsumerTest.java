@@ -4,14 +4,22 @@ import org.junit.Test;
 
 import java.util.List;
 
-import static org.junit.Assert.*;
-
 public class MemoryConsumerTest {
 
     @Test
-    public void memoryConsumerTest() {
-        MemoryConsumer mc = PlainMemoryConsumer.builder()
+    public void memoryConsumerWithDefragmentationTest() {
+        MemoryConsumer mc = MemoryConsumerImpl.builder()
                 .memory(getInitialMemory())
+                .build();
+
+        mc.consume();
+    }
+
+    @Test
+    public void memoryConsumerWithoutDefragmentationTest() {
+        MemoryConsumer mc = MemoryConsumerImpl.builder()
+                .memory(getInitialMemory())
+                .defragmentationEnabled(false)
                 .build();
 
         mc.consume();
@@ -21,7 +29,7 @@ public class MemoryConsumerTest {
         return List.of(
                 MemoryChunk.builder()
                         .label("free")
-                        .size(100)
+                        .size(1_000)
                         .build()
         );
     }
