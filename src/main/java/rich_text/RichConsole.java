@@ -7,9 +7,11 @@ import java.util.Optional;
 public class RichConsole {
 
     private final static String RESET_ANSI = "\u001b[0m";
-    public static void print(RichTextConfig config, String message, Object ... substitutions) {
+
+    public static void print(RichTextConfig config, String message, Object... substitutions) {
         print(String.format(message, substitutions), config);
     }
+
     public static void print(String message, RichTextConfig config) {
         StringBuilder target = new StringBuilder();
         Optional.ofNullable(config)
@@ -30,6 +32,10 @@ public class RichConsole {
                 );
         target.append(message)
                 .append(RESET_ANSI);
-        System.out.println(target.toString());
+        if (Optional.ofNullable(config)
+                .map(RichTextConfig::isNewLine).orElse(true)) {
+            target.append('\n');
+        }
+        System.out.print(target.toString());
     }
 }

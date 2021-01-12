@@ -9,4 +9,6 @@ public class RichTextConfig {
     private final Color color;
     private final Decoration decoration;
     private final Background background;
+    @Builder.Default
+    private final boolean newLine = true;
 }

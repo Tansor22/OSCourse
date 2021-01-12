@@ -12,19 +12,20 @@ import java.util.LongSummaryStatistics;
 import java.util.Objects;
 import java.util.function.ToLongFunction;
 
+import static java.util.Objects.*;
 import static rich_text.RichConsole.print;
 
 @SuperBuilder
 public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
+    PrioritizedProcessorState state;
 
     @Override
     public void processTasks() {
-        // functional element of priority scheme
-        PrioritizedProcessorState state = new PrioritizedProcessorState(initTimeQuantum, new TaskQueue(tasks));
-        // total time of work
-        processingTime = 0;
         PrioritizedTask task;
-        while (Objects.nonNull(task = state.getTaskQueue().poll())) {
+        PrioritizedProcessorState state = isNull(this.state)
+                ? new PrioritizedProcessorState(initTimeQuantum, new TaskQueue(tasks))
+                : this.state;
+        while (nonNull(task = state.getNextTask())) {
             // current time
             DurationWrapper timeQuantum = state.getCurrentTimeQuantum();
             long timeQuantumMillis = timeQuantum.getMillis();
@@ -73,7 +74,7 @@ public class PrioritizedProcessor extends QuantizedProcessor<PrioritizedTask> {
             }
             state.handlePostProceed(isTimeQuantumSpent, task, operation);
         }
-        printStatistics();
+        //printStatistics();
     }
 
     private LongSummaryStatistics getStatistics(ToLongFunction<Task.Operation> operationMapper) {

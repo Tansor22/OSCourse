@@ -7,6 +7,7 @@ import tasks.Task;
 
 @SuperBuilder
 public abstract class QuantizedProcessor<T extends Task> extends TaskProcessor<T> {
+    @Getter
     protected DurationWrapper initTimeQuantum;
     @Getter
     protected long processingTime;

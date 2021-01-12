@@ -31,7 +31,11 @@ public class PrioritizedProcessorState {
         }
     }
 
-    public void handlePostProceed(boolean isTimeQuantumSpent, PrioritizedTask task, Task.Operation operation) {
+    public synchronized PrioritizedTask getNextTask() {
+        return taskQueue.poll();
+    }
+
+    public synchronized void handlePostProceed(boolean isTimeQuantumSpent, PrioritizedTask task, Task.Operation operation) {
         if (!isTimeQuantumSpent) {
             _deque.push(DurationWrapper.millis(Math.abs(operation.getRemainedBurstTime())));
             // remained burt time should never be used
@@ -45,7 +49,7 @@ public class PrioritizedProcessorState {
     /**
      * Shadows task, so the task won't be auto selected by taskQueue
      *
-     * @param task  Task to be shadowed.
+     * @param task Task to be shadowed.
      */
     private void coverTask(PrioritizedTask task) {
         discoverTask();
