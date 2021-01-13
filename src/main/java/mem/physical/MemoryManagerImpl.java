@@ -1,4 +1,4 @@
-package rom;
+package mem.physical;
 
 import lombok.experimental.SuperBuilder;
 import rich_text.*;
@@ -9,7 +9,7 @@ import java.util.Optional;
 import java.util.Random;
 
 @SuperBuilder
-public class MemoryConsumerImpl extends MemoryConsumer {
+public class MemoryManagerImpl extends MemoryManager {
     List<MemoryChunk> _taskQueue;
 
     @Override

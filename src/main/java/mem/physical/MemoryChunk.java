@@ -1,4 +1,4 @@
-package rom;
+package mem.physical;
 
 import lombok.*;
 import lombok.experimental.Accessors;

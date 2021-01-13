@@ -1,30 +1,33 @@
-package rom;
+package mem;
 
+import mem.physical.MemoryChunk;
+import mem.physical.MemoryManager;
+import mem.physical.MemoryManagerImpl;
 import org.junit.Test;
 
 import java.util.List;
 
-public class MemoryConsumerTest {
+public class MemoryManagerTest {
 
     @Test
     public void withDefragmentation() {
-        MemoryConsumer mc = MemoryConsumerImpl.builder()
+        MemoryManager mc = MemoryManagerImpl.builder()
                 .memory(getInitialMemory())
                 .taskAppearingPercentage(.5f)
                 .build();
 
-        mc.consume();
+        mc.manage();
     }
 
     @Test
     public void withoutDefragmentation() {
-        MemoryConsumer mc = MemoryConsumerImpl.builder()
+        MemoryManager mc = MemoryManagerImpl.builder()
                 .memory(getInitialMemory())
                 .taskAppearingPercentage(.5f)
                 .defragmentationEnabled(false)
                 .build();
 
-        mc.consume();
+        mc.manage();
     }
 
     public List<MemoryChunk> getInitialMemory() {

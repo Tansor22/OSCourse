@@ -1,4 +1,4 @@
-package rom;
+package mem.physical;
 
 import rich_text.Color;
 import rich_text.RichConsole;
