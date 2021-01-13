@@ -57,9 +57,7 @@ public class MemoryConsumerImpl extends MemoryConsumer {
                     _taskQueue.add(newChunk);
                 }
             }
-            RichConsole.print(newTaskAppearingStatus, RichTextConfig.builder()
-                    .decoration(Decoration.UNDERLINE)
-                    .build());
+            RichConsole.print(newTaskAppearingStatus, RichTextConfig.metaMessageStyle());
             while (!_taskQueue.isEmpty()) {
                 RichConsole.print("Trying to get task from queue...", RichTextConfig.metaMessageStyle());
                 MemoryChunk chunkFromQueue = _taskQueue.get(0);
@@ -72,9 +70,7 @@ public class MemoryConsumerImpl extends MemoryConsumer {
                     _taskQueue.remove(chunkFromQueue);
                     taskAddingFromQueueStatus = "Task from queue was successfully added - " + chunkFromQueue.toString();
                 }
-                RichConsole.print(taskAddingFromQueueStatus, RichTextConfig.builder()
-                        .decoration(Decoration.UNDERLINE)
-                        .build());
+                RichConsole.print(taskAddingFromQueueStatus, RichTextConfig.metaMessageStyle());
 
                 // always at the end
                 if (!isTaskAdded) {
@@ -83,9 +79,7 @@ public class MemoryConsumerImpl extends MemoryConsumer {
             }
             isMemoryDisposed = workPerformed(memory);
             // tracking
-            RichConsole.print(RichTextConfig.builder()
-                    .decoration(Decoration.UNDERLINE)
-                    .build(), "Time tick: %s, queue size: %s", timer, _taskQueue.size());
+            RichConsole.print(RichTextConfig.metaMessageStyle(), "Time tick: %s, queue size: %s", timer, _taskQueue.size());
 
             // chunks as data structures
             new PojoMemoryPrinter().print(memory);
