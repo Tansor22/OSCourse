@@ -7,18 +7,20 @@ import java.util.List;
 public class MemoryConsumerTest {
 
     @Test
-    public void memoryConsumerWithDefragmentationTest() {
+    public void withDefragmentation() {
         MemoryConsumer mc = MemoryConsumerImpl.builder()
                 .memory(getInitialMemory())
+                .taskAppearingPercentage(.5f)
                 .build();
 
         mc.consume();
     }
 
     @Test
-    public void memoryConsumerWithoutDefragmentationTest() {
+    public void withoutDefragmentation() {
         MemoryConsumer mc = MemoryConsumerImpl.builder()
                 .memory(getInitialMemory())
+                .taskAppearingPercentage(.5f)
                 .defragmentationEnabled(false)
                 .build();
 
@@ -29,7 +31,7 @@ public class MemoryConsumerTest {
         return List.of(
                 MemoryChunk.builder()
                         .label("free")
-                        .size(1_000)
+                        .size(500)
                         .build()
         );
     }

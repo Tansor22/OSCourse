@@ -22,9 +22,9 @@ public abstract class MemoryConsumer implements Consumer<List<MemoryChunk>> {
     @Builder.Default
     float _taskAppearingPercentage = .2f;
     @Builder.Default
-    IntRange _sizeRange = new IntRange(15, 75);
+    IntRange _sizeRange = new IntRange(15, 175);
     @Builder.Default
-    IntRange _timeRange = new IntRange(15, 75);
+    IntRange _timeRange = new IntRange(15, 175);
     @Builder.Default
     boolean _defragmentationEnabled = true;
 
