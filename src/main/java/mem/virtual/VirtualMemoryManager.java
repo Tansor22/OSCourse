@@ -22,9 +22,11 @@ public abstract class VirtualMemoryManager implements Consumer<List<Process>> {
     @Builder.Default
     int _pagesCount = 35;
     @Builder.Default
-    int _processesCount = 7;
+    int _processesLimit = 7;
     @Builder.Default
     float _processAppearingPercentage = .3f;
+    @Builder.Default
+    float _memoryOccupiedThreshold = .6f;
     @Builder.Default
     IntRange _processPagesCountRange = new IntRange(6, 13);
     @Builder.Default

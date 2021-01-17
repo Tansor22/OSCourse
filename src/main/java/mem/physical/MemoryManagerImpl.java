@@ -1,6 +1,7 @@
 package mem.physical;
 
 import lombok.experimental.SuperBuilder;
+import mem.shared.Utils;
 import rich_text.*;
 
 import java.util.ArrayList;
@@ -137,7 +138,7 @@ public class MemoryManagerImpl extends MemoryManager {
     private MemoryChunk getRandomMemoryChunk(int id) {
         // auxiliary vars
         Random r = new Random(System.currentTimeMillis());
-        String chunkLabel = String.format("%s:%s", MemoryChunk.LABELS[r.nextInt(MemoryChunk.LABELS.length)], id);
+        String chunkLabel = String.format("%s:%s", Utils.choice(Utils.LABELS), id);
         int[] ints = r.ints(5, 30)
                 .limit(2)
                 .toArray();

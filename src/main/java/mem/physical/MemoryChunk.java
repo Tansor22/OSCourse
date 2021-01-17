@@ -19,10 +19,6 @@ public class MemoryChunk {
         return "free".equalsIgnoreCase(_label);
     }
 
-    static String[] LABELS = new String[]{
-        "Browser Tab", "Bitcoin Mining", "GUI"
-    };
-
     @Override
     public String toString() {
         return String.format("{%s - size: %s, timeRemain: %s}", _label, _size, _timeRemain);

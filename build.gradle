@@ -20,6 +20,7 @@ publishing {
 
 repositories {
     mavenCentral()
+    //maven { url 'https://jitpack.io' }
 }
 
 dependencies {
@@ -29,4 +30,8 @@ dependencies {
 
     testCompileOnly 'org.projectlombok:lombok:1.18.12'
     testAnnotationProcessor 'org.projectlombok:lombok:1.18.12'
+    compile group: 'org.apache.commons', name: 'commons-lang3', version: '3.11'
+
+
+    // compile 'com.github.skebir:prettytable:v1.0'
 }
